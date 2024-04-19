@@ -35,3 +35,40 @@ function modelReady() {
   // model is ready
   statusEl.html('model loaded');
 }
+
+const apiKey = 'a0ff309c498c8ae5835c2d733be3a51e';
+
+// Obtener películas populares
+fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=en-US&page=1`)
+  .then(response => response.json())
+  .then(data => {
+    // Seleccionar 10 películas aleatorias
+    const randomMovies = getRandomMovies(data.results, 10);
+
+    // Obtener reseñas de las películas seleccionadas
+    randomMovies.forEach(movie => {
+      fetch(`https://api.themoviedb.org/3/movie/${movie.id}/reviews?api_key=${apiKey}&language=en-US&page=1`)
+        .then(response => response.json())
+        .then(data => {
+          // Procesar las reseñas de la película
+          const reviews = data.results.map(review => review.content.substring(0, 190));
+          console.log(`Reseñas de la película "${movie.title}":`, reviews);
+        })
+        .catch(error => {
+          console.error(`Error al obtener reseñas de la película "${movie.title}":`, error);
+        });
+    });
+  })
+  .catch(error => {
+    console.error('Error al obtener películas populares:', error);
+  });
+
+// Función para seleccionar películas aleatorias
+function getRandomMovies(movies, count) {
+  const randomMovies = [];
+  for (let i = 0; i < count; i++) {
+    const randomIndex = Math.floor(Math.random() * movies.length);
+    randomMovies.push(movies[randomIndex]);
+  }
+  return randomMovies;
+}
